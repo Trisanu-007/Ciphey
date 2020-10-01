@@ -1,25 +1,66 @@
 from typing import Optional, Dict, List
-
+from loguru import logger
 from ciphey.iface import ParamSpec, Config, T, U, Decoder, registry
 
 
 @registry.register_multi((str, str), (bytes, bytes))
 class Braille(Decoder[T, U]):
-    BRAILLE_GLYPH = ['⠀','⠮','⠐','⠼','⠫','⠩','⠯','⠄','⠷','⠾','⠡','⠬','⠠','⠤','⠨','⠌','⠴','⠂','⠆','⠒','⠲','⠢',
-                    '⠖','⠶','⠦','⠔','⠱','⠰','⠣','⠿','⠜','⠹','⠈','⠁','⠃','⠉','⠙','⠑','⠋','⠛','⠓','⠊','⠚','⠅',
-                    '⠇','⠍','⠝','⠕','⠏','⠟','⠗','⠎','⠞','⠥','⠧','⠺','⠭','⠽','⠵','⠪','⠳','⠻','⠘','⠸']
-    ASCII_GLYPH = [' ','!','"','#','$','%','&','','(',')','*','+',',','-','.','/',
-                    '0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?','@',
-                    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q',
-                    'r','s','t','u','v','w','x','y','z','[','\\',']','^','_']
-    BRAILLE_CODE_DICT_INV = dict(zip(BRAILLE_GLYPH, ASCII_GLYPH))    
+    UNICODE_STRING = "⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿"
+    C_STRING = " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)="
+    translation = str.maketrans(UNICODE_STRING, C_STRING)
+
+    GRADE_II = {'⠁':'a',
+                '⠃':'but',
+                '⠉':'can',
+                '⠙':'do',
+                '⠑':'every',
+                '⠋':'from',
+                '⠛':'go',
+                '⠓':'have',
+                '⠚':'just',
+                '⠅':'knowledge',
+                '⠇':'like',
+                '⠍':'more',
+                '⠝':'not',
+                '⠏':'people', 
+                '⠟':'quite', 
+                '⠗':'rather', 
+                '⠎':'so', 
+                '⠞':'that', 
+                '⠌':'still',
+                '⠥':'us',
+                '⠧':'very',
+                '⠭':'it',
+                '⠽':'you',
+                '⠵':'as',
+                '⠡':'child',
+                '⠩':'shall',
+                '⠹':'this',
+                '⠱':'which',
+                '⠳':'out',
+                '⠺':'will',
+                '⠆':'be',
+                '⠒':'con',
+                '⠲':'dis',
+                '⠢':'enough',
+                '⠖':'to',
+                '⠶':'were',
+                '⠦':'his',
+                '⠔':'in',
+                '⠴':'by/was',
+                '⠤':'com'
+                }
+
+
 
     def decode(self, text: T) -> Optional[U]:
-        result = []
-        for char in text:
-            result.append(self.BRAILLE_CODE_DICT_INV[char])
+        for c in text:
+            if str(c) in self.UNICODE_STRING:
+                continue
+            logger.trace(f"Non-Braille glyph '{c}' found")
+            return None
 
-        return ''.join(result)
+        return text.translate(self.translation)
 
     @staticmethod
     def priority() -> float:
@@ -30,7 +71,6 @@ class Braille(Decoder[T, U]):
 
     @staticmethod
     def getParams() -> Optional[Dict[str, ParamSpec]]:
-        """The parameters this returns"""
         pass
 
     @staticmethod
