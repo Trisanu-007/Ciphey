@@ -19,4 +19,5 @@ from . import (
     multi_tap,
     url,
     braille,
+    tap_code,
 )
