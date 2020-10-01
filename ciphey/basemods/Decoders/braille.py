@@ -6,52 +6,8 @@ from ciphey.iface import ParamSpec, Config, T, U, Decoder, registry
 @registry.register_multi((str, str), (bytes, bytes))
 class Braille(Decoder[T, U]):
     UNICODE_STRING = "⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿"
-    C_STRING = " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)="
+    C_STRING = " a1b'k2l@cif/msp\"e3h9o6r^djg>ntq,*5<-u8v.%[$+x!&;:4\\0z7(_?w]#y)="
     translation = str.maketrans(UNICODE_STRING, C_STRING)
-
-    GRADE_II = {'⠁':'a',
-                '⠃':'but',
-                '⠉':'can',
-                '⠙':'do',
-                '⠑':'every',
-                '⠋':'from',
-                '⠛':'go',
-                '⠓':'have',
-                '⠚':'just',
-                '⠅':'knowledge',
-                '⠇':'like',
-                '⠍':'more',
-                '⠝':'not',
-                '⠏':'people', 
-                '⠟':'quite', 
-                '⠗':'rather', 
-                '⠎':'so', 
-                '⠞':'that', 
-                '⠌':'still',
-                '⠥':'us',
-                '⠧':'very',
-                '⠭':'it',
-                '⠽':'you',
-                '⠵':'as',
-                '⠡':'child',
-                '⠩':'shall',
-                '⠹':'this',
-                '⠱':'which',
-                '⠳':'out',
-                '⠺':'will',
-                '⠆':'be',
-                '⠒':'con',
-                '⠲':'dis',
-                '⠢':'enough',
-                '⠖':'to',
-                '⠶':'were',
-                '⠦':'his',
-                '⠔':'in',
-                '⠴':'by/was',
-                '⠤':'com'
-                }
-
-
 
     def decode(self, text: T) -> Optional[U]:
         for c in text:
@@ -60,7 +16,31 @@ class Braille(Decoder[T, U]):
             logger.trace(f"Non-Braille glyph '{c}' found")
             return None
 
-        return text.translate(self.translation)
+        translated = text.translate(self.translation)
+        wordArr = []
+
+        for word in translated[::-1].split(' '):
+            # if two commas are infront of word, capitalize word and remove comma
+            if (word.find(',,') != -1):
+                wordArr.append(word.replace(',,','').upper())
+            else:
+                wordArr.append(word)
+
+        string = ' '.join(wordArr)
+        skip = False
+        result = ""
+
+        for i in range(0, len(string)):
+            # check if comma is infront of letter, and if so captialize the letter
+            if skip:
+                skip = False
+                continue
+            if i < len(string) - 1 and string[i] == ',' and string[i + 1].isalpha():
+                result += string[i + 1].capitalize()
+                skip = True
+            else:
+                result += string[i]
+        return result[::-1]
 
     @staticmethod
     def priority() -> float:
