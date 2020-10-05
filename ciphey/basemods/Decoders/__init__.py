@@ -20,4 +20,5 @@ from . import (
     url,
     braille,
     tap_code,
+    brainfuck,
 )
