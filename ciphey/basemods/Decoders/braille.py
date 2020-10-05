@@ -1,13 +1,18 @@
 from typing import Optional, Dict, List
 from loguru import logger
 from ciphey.iface import ParamSpec, Config, T, U, Decoder, registry
+from ciphey.basemods.Resources import cipheydists
 
 
 @registry.register_multi((str, str), (bytes, bytes))
 class Braille(Decoder[T, U]):
+
     UNICODE_STRING = "⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿"
-    C_STRING = " a1b'k2l@cif/msp\"e3h9o6r^djg>ntq,*5<-u8v.%[$+x!&;:4\\0z7(_?w]#y)="
-    translation = str.maketrans(UNICODE_STRING, C_STRING)
+
+    translation = cipheydists.CipheyDists.getResource(
+        name="translate::braille", self=cipheydists.CipheyDists
+    )
+    translation = {int(key): int(val) for key, val in translation.items()}
 
     def decode(self, text: T) -> Optional[U]:
         for c in text:
@@ -21,7 +26,7 @@ class Braille(Decoder[T, U]):
         for word in translated.split(' '):
             # if two commas are infront of word, capitalize word and remove comma
             if (word.find(',,') != -1):
-                wordArr.append(word.replace(',,','').upper())
+                wordArr.append(word.replace(',,', '').upper())
             else:
                 wordArr.append(word)
 
