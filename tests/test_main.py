@@ -230,14 +230,12 @@ def test_brandon():
     )
     assert True
 
-<<<<<<< HEAD
 def test_braille():
     res = decrypt(
         Config.library_default().complete_config(), 
         "⠠⠓⠑⠇⠇⠕⠀⠍⠽⠀⠝⠁⠍⠑⠀⠊⠎⠀⠃⠑⠑⠀⠁⠝⠙⠀⠠⠊⠀⠇⠊⠅⠑⠀⠙⠕⠛⠀⠁⠝⠙⠀⠁⠏⠏⠇⠑⠀⠁⠝⠙⠀⠞⠗⠑⠑"
     )
     assert res == answer_str
-=======
 
 def test_brainfuck():
     res = decrypt(
@@ -253,4 +251,3 @@ def test_ascii_shift():
         "\"?FFIzGSzH;G?zCMz<??z;H>z#zFCE?z>IAz;H>z;JJF?z;H>zNL??",
     )
     assert res.lower() == answer_str.lower()
->>>>>>> f21ff7b3720a0718a845759bd0b7122be8dfc108

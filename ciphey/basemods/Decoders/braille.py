@@ -11,15 +11,14 @@ class Braille(Decoder[T, U]):
 
     def decode(self, text: T) -> Optional[U]:
         for c in text:
-            if str(c) in self.UNICODE_STRING:
+            if c == ' ' or str(c) in self.UNICODE_STRING:
                 continue
-            logger.trace(f"Non-Braille glyph '{c}' found")
             return None
 
-        translated = text.translate(self.translation)
+        translated = text.translate(self.translation)[::-1]
         wordArr = []
 
-        for word in translated[::-1].split(' '):
+        for word in translated.split(' '):
             # if two commas are infront of word, capitalize word and remove comma
             if (word.find(',,') != -1):
                 wordArr.append(word.replace(',,','').upper())
@@ -40,7 +39,7 @@ class Braille(Decoder[T, U]):
                 skip = True
             else:
                 result += string[i]
-        return result[::-1]
+        return result
 
     @staticmethod
     def priority() -> float:
